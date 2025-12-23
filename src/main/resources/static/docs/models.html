@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Модели</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+    nav a { margin-right: 15px; text-decoration: none; color: blue; }
+    h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
+    pre { background: #f4f4f4; padding: 10px; overflow-x: auto; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+<h1>Модели (сущности JPA)</h1>
+<nav>
+  <a href="index.html">Главная</a>
+  <a href="controllers.html">Контроллеры</a>
+  <a href="services.html">Сервисы</a>
+  <a href="repositories.html">Репозитории</a>
+  <a href="dataloader.html">DataLoader</a>
+  <a href="pages.html">Шаблоны Thymeleaf</a>
+</nav>
+
+<h2>User</h2>
+<p>Сущность пользователя:</p>
+<ul>
+  <li>id, firstName, middleName, lastName, email</li>
+  <li>name — полное имя (генерируется автоматически)</li>
+  <li>getFullName() — возвращает "Имя Фамилия" или "Имя Отчество Фамилия"</li>
+</ul>
+<pre>
+@Entity
+@Table(name = "users")
+public class User {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @NotBlank(message = "Имя не может быть пустым")
+  @Size(min = 2, max = 50)
+  private String firstName;
+
+  private String middleName;
+
+  @NotBlank(message = "Фамилия не может быть пустой")
+  @Size(min = 2, max = 50)
+  private String lastName;
+
+  @Email
+  @NotBlank
+  private String email;
+
+  @NotBlank
+  @Column(name = "name", nullable = false)
+  private String name; // новое поле для полного имени
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getFirstName() {
+    return firstName;
+  }
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+    updateName();
+  }
+
+  public String getMiddleName() {
+    return middleName;
+  }
+
+  public void setMiddleName(String middleName) {
+    this.middleName = middleName;
+    updateName();
+  }
+
+  public String getLastName() {
+    return lastName;
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+    updateName();
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getFullName() {
+    if (middleName != null && !middleName.isEmpty()) {
+      return firstName + " " + middleName + " " + lastName;
+    } else {
+      return firstName + " " + lastName;
+    }
+  }
+
+  public void setFullName(String fullName) {
+    if (fullName == null || fullName.isBlank()) return;
+
+    String[] parts = fullName.trim().split("\\s+");
+
+    if (parts.length == 3) {
+      this.firstName = parts[0];
+      this.middleName = parts[1];
+      this.lastName = parts[2];
+    } else if (parts.length == 2) {
+      this.firstName = parts[0];
+      this.middleName = "";
+      this.lastName = parts[1];
+    } else {
+      this.firstName = fullName;
+      this.middleName = "";
+      this.lastName = "";
+    }
+    updateName();
+  }
+
+  private void updateName() {
+    this.name = getFullName();
+  }
+}
+</pre>
+
+<h2>Product</h2>
+<p>Сущность продукта:</p>
+<ul>
+  <li>id, name, category, size, color, price, stockQuantity, rating</li>
+  <li>Валидация: name не пустое, price &gt;= 1</li>
+</ul>
+<pre>
+@Entity
+@Table(name = "products")
+public class Product {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY) // автоматически генерируемый ID
+  private Long id;
+
+  @NotBlank
+  private String name;
+
+  private String category;
+  private String size;
+  private String color;
+
+  @Min(1)
+  private double price;
+
+  private int stockQuantity;
+  private double rating;
+
+  public Long getId() { return id; }
+  public void setId(Long id) { this.id = id; }
+
+  public String getName() { return name; }
+  public void setName(String name) { this.name = name; }
+
+  public String getCategory() { return category; }
+  public void setCategory(String category) { this.category = category; }
+
+  public String getSize() { return size; }
+  public void setSize(String size) { this.size = size; }
+
+  public String getColor() { return color; }
+  public void setColor(String color) { this.color = color; }
+
+  public double getPrice() { return price; }
+  public void setPrice(double price) { this.price = price; }
+
+  public int getStockQuantity() { return stockQuantity; }
+  public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
+
+  public double getRating() { return rating; }
+  public void setRating(double rating) { this.rating = rating; }
+}
+</pre>
+
+<h2>Order</h2>
+<p>Сущность заказа:</p>
+<ul>
+  <li>id, orderDate, totalAmount</li>
+  <li>User — связь ManyToOne</li>
+  <li>items — список OrderItem (OneToMany, cascade ALL)</li>
+  <li>Методы: addItem(), removeItem(), recalculateTotalAmount()</li>
+</ul>
+<pre>
+@Entity
+@Table(name = "orders")
+public class Order {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  private LocalDate orderDate;
+
+  private double totalAmount;
+
+  @ManyToOne
+  private User user;
+
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List[OrderItem] items = new ArrayList<>();
+
+  public Long getId() { return id; }
+  public void setId(Long id) { this.id = id; }
+
+  public LocalDate getOrderDate() { return orderDate; }
+  public void setOrderDate(LocalDate orderDate) { this.orderDate = orderDate; }
+
+  public double getTotalAmount() { return totalAmount; }
+
+  public User getUser() { return user; }
+  public void setUser(User user) { this.user = user; }
+
+  public List[OrderItem] getItems() { return items; }
+
+  public void addItem(OrderItem item) {
+    item.setOrder(this);
+    this.items.add(item);
+    recalculateTotalAmount();
+  }
+
+  public void removeItem(OrderItem item) {
+    this.items.remove(item);
+    item.setOrder(null);
+    recalculateTotalAmount();
+  }
+
+  public void recalculateTotalAmount() {
+    this.totalAmount = items.stream()
+        .mapToDouble(OrderItem::getPrice)
+        .sum();
+  }
+}
+</pre>
+
+<h2>OrderItem</h2>
+<p>Позиция заказа:</p>
+<ul>
+  <li>id, product, quantity, price, order</li>
+  <li>Связи: ManyToOne с Order и Product</li>
+  <li>Валидация: quantity >= 1, price >= 0</li>
+</ul>
+<pre>
+@Entity
+@Table(name = "order_items")
+public class OrderItem {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "order_id", nullable = false)
+  private Order order;
+
+  @ManyToOne
+  @JoinColumn(name = "product_id", nullable = false)
+  private Product product;
+
+  @Min(1)
+  private int quantity;
+
+  @Min(0)
+  private double price;
+
+  public Long getId() { return id; }
+  public void setId(Long id) { this.id = id; }
+
+  public Order getOrder() { return order; }
+  public void setOrder(Order order) { this.order = order; }
+
+  public Product getProduct() { return product; }
+  public void setProduct(Product product) { this.product = product; }
+
+  public int getQuantity() { return quantity; }
+  public void setQuantity(int quantity) { this.quantity = quantity; }
+
+  public double getPrice() { return price; }
+  public void setPrice(double price) { this.price = price; }
+}
+</pre>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Репозитории</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+    nav a { margin-right: 15px; text-decoration: none; color: blue; }
+    h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
+    pre { background: #f4f4f4; padding: 10px; overflow-x: auto; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+<h1>Репозитории Spring Data JPA</h1>
+<nav>
+  <a href="index.html">Главная</a>
+  <a href="controllers.html">Контроллеры</a>
+  <a href="services.html">Сервисы</a>
+  <a href="models.html">Модели</a>
+  <a href="dataloader.html">DataLoader</a>
+  <a href="pages.html">Шаблоны Thymeleaf</a>
+</nav>
+
+<h2>UserRepository</h2>
+<p>Интерфейс для работы с пользователями:</p>
+<pre>
+public interface UserRepository extends JpaRepository&lt;User, Long&gt; {}
+</pre>
+
+<h2>ProductRepository</h2>
+<p>Интерфейс для работы с продуктами:</p>
+<pre>
+public interface ProductRepository extends JpaRepository&lt;Product, Long&gt; {}
+</pre>
+
+<h2>OrderRepository</h2>
+<p>Интерфейс для работы с заказами:</p>
+<pre>
+public interface OrderRepository extends JpaRepository&lt;Order, Long&gt; {}
+</pre>
+
+<h2>OrderItemRepository</h2>
+<p>Интерфейс для работы с позициями заказа:</p>
+<pre>
+public interface OrderItemRepository extends JpaRepository&lt;OrderItem, Long&gt; {}
+</pre>
+
+</body>
+</html>

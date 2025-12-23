@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${order.id} != null ? 'Редактировать заказ' : 'Добавить заказ'">Форма заказа</title>
+</head>
+<body>
+<h2 th:text="${order.id} != null ? 'Редактировать заказ' : 'Добавить заказ'"></h2>
+
+<form th:action="@{/orders}" th:object="${order}" method="post">
+  <input type="hidden" th:field="*{id}" />
+
+  <label>Пользователь:</label>
+  <select th:field="*{user.id}" required>
+    <option th:each="u : ${users}" th:value="${u.id}"
+            th:text="${u.firstName + ' ' + u.lastName}"
+            th:selected="${order.user != null} ? ${u.id} == ${order.user.id} : false">
+    </option>
+  </select>
+  <div th:if="${#fields.hasErrors('user')}" th:errors="*{user}"></div>
+
+  <label>Продукт:</label>
+  <select th:field="*{items[0].product.id}" required>
+    <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.name}"
+            th:selected="${order.items.size() > 0} ? ${p.id} == ${order.items[0].product.id} : false">
+    </option>
+  </select>
+  <div th:if="${#fields.hasErrors('items[0].product')}" th:errors="*{items[0].product}"></div>
+
+  <label>Количество:</label>
+  <input type="number" th:field="*{items[0].quantity}" min="1" required />
+  <div th:if="${#fields.hasErrors('items[0].quantity')}" th:errors="*{items[0].quantity}"></div>
+
+  <label>Дата заказа:</label>
+  <input type="date" th:field="*{orderDate}" required />
+
+  <button type="submit">Сохранить</button>
+</form>
+
+<br>
+<a th:href="@{/orders}">Назад к списку заказов</a>
+</body>
+</html>

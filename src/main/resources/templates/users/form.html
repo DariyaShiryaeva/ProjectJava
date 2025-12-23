@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${user.id} != null ? 'Редактировать пользователя' : 'Добавить пользователя'">
+    Форма пользователя
+  </title>
+</head>
+<body>
+<h2 th:text="${user.id} != null ? 'Редактировать пользователя' : 'Добавить пользователя'"></h2>
+
+<form th:action="@{/users}" th:object="${user}" method="post">
+  <input type="hidden" th:field="*{id}" />
+
+  <label>Имя:</label>
+  <input type="text" th:field="*{firstName}" required />
+  <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+
+  <label>Отчество:</label>
+  <input type="text" th:field="*{middleName}" />
+  <div th:if="${#fields.hasErrors('middleName')}" th:errors="*{middleName}"></div>
+
+  <label>Фамилия:</label>
+  <input type="text" th:field="*{lastName}" required />
+  <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+
+  <label>Email:</label>
+  <input type="email" th:field="*{email}" required />
+  <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+
+  <button type="submit">Сохранить</button>
+</form>
+
+<br>
+<a th:href="@{/users}">Назад к списку пользователей</a>
+</body>
+</html>

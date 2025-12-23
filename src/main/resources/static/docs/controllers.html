@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Контроллеры</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+    nav a { margin-right: 15px; text-decoration: none; color: blue; }
+    h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
+    pre { background: #f4f4f4; padding: 10px; overflow-x: auto; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+<h1>Контроллеры проекта</h1>
+<nav>
+  <a href="index.html">Главная</a>
+  <a href="services.html">Сервисы</a>
+  <a href="models.html">Модели</a>
+  <a href="repositories.html">Репозитории</a>
+  <a href="dataloader.html">DataLoader</a>
+  <a href="pages.html">Шаблоны Thymeleaf</a>
+</nav>
+
+<h2>UserController</h2>
+<p>Управляет CRUD-операциями для пользователей:</p>
+<ul>
+  <li><b>GET /users</b> — список пользователей</li>
+  <li><b>GET /users/new</b> — форма добавления нового пользователя</li>
+  <li><b>POST /users</b> — сохранение пользователя (создание/редактирование)</li>
+  <li><b>GET /users/edit/{id}</b> — форма редактирования пользователя</li>
+  <li><b>GET /users/delete/{id}</b> — удаление пользователя</li>
+</ul>
+<pre>
+@Controller
+@RequestMapping("/users")
+public class UserController {
+
+  private final UserService service;
+
+  public UserController(UserService service) {
+    this.service = service;
+  }
+
+  @GetMapping
+  public String list(Model model) {
+    model.addAttribute("users", service.findAll());
+    return "users/list";
+  }
+
+  @GetMapping("/new")
+  public String create(Model model) {
+    model.addAttribute("user", new User());
+    return "users/form";
+  }
+
+  @PostMapping
+  public String save(@Valid User user, BindingResult result) {
+    if (result.hasErrors()) {
+      return "users/form";
+    }
+    service.save(user);
+    return "redirect:/users";
+  }
+
+  @GetMapping("/delete/{id}")
+  public String delete(@PathVariable Long id) {
+    service.delete(id);
+    return "redirect:/users";
+  }
+
+  @GetMapping("/edit/{id}")
+  public String edit(@PathVariable Long id, Model model) {
+    User user = service.findById(id);
+    if (user == null) {
+      return "redirect:/users";
+    }
+    model.addAttribute("user", user);
+    return "users/form";
+  }
+}
+  </pre>
+
+<h2>ProductController</h2>
+<p>Управляет CRUD-операциями для продуктов:</p>
+<ul>
+  <li><b>GET /products</b> — список продуктов</li>
+  <li><b>GET /products/new</b> — форма добавления продукта</li>
+  <li><b>POST /products</b> — сохранение продукта</li>
+  <li><b>GET /products/edit/{id}</b> — редактирование продукта</li>
+  <li><b>GET /products/delete/{id}</b> — удаление продукта</li>
+</ul>
+<pre>
+@Controller
+@RequestMapping("/products")
+public class ProductController {
+
+  private final ProductService service;
+
+  public ProductController(ProductService service) {
+    this.service = service;
+  }
+
+  @GetMapping
+  public String list(Model model) {
+    model.addAttribute("products", service.findAll());
+    return "products/list";
+  }
+
+  @GetMapping("/new")
+  public String create(Model model) {
+    model.addAttribute("product", new Product());
+    return "products/form";
+  }
+
+  @PostMapping
+  public String save(@Valid Product product, BindingResult result) {
+    if (result.hasErrors()) {
+      return "products/form";
+    }
+    service.save(product);
+    return "redirect:/products";
+  }
+
+  @GetMapping("/edit/{id}")
+  public String edit(@PathVariable Long id, Model model) {
+    model.addAttribute("product", service.findById(id));
+    return "products/form";
+  }
+
+  @GetMapping("/delete/{id}")
+  public String delete(@PathVariable Long id) {
+    service.delete(id);
+    return "redirect:/products";
+  }
+}
+  </pre>
+
+<h2>OrderController</h2>
+<p>Управляет заказами:</p>
+<ul>
+  <li><b>GET /orders</b> — список заказов</li>
+  <li><b>GET /orders/new</b> — создание нового заказа</li>
+  <li><b>POST /orders</b> — сохранение заказа</li>
+  <li><b>GET /orders/edit/{id}</b> — редактирование заказа</li>
+  <li><b>GET /orders/delete/{id}</b> — удаление заказа</li>
+</ul>
+<pre>
+@Controller
+@RequestMapping("/orders")
+public class OrderController {
+
+  private final OrderService orderService;
+  private final UserService userService;
+  private final ProductService productService;
+
+  public OrderController(OrderService orderService,
+      UserService userService,
+      ProductService productService) {
+    this.orderService = orderService;
+    this.userService = userService;
+    this.productService = productService;
+  }
+
+  @GetMapping
+  public String list(Model model) {
+    model.addAttribute("orders", orderService.findAll());
+    return "orders/list";
+  }
+
+  @GetMapping("/new")
+  public String create(Model model) {
+    Order order = new Order();
+    order.setOrderDate(LocalDate.now());
+
+    model.addAttribute("order", order);
+    model.addAttribute("users", userService.findAll());
+    model.addAttribute("products", productService.findAll());
+
+    return "orders/form";
+  }
+
+  @PostMapping
+  public String save(@ModelAttribute Order order) {
+    User user = userService.findById(order.getUser().getId());
+    order.setUser(user);
+
+    for (OrderItem item : order.getItems()) {
+      Product product = productService.findById(item.getProduct().getId());
+      item.setProduct(product);
+      item.setOrder(order);
+      item.setPrice(product.getPrice() * item.getQuantity());
+    }
+
+    order.recalculateTotalAmount();
+    orderService.save(order);
+    return "redirect:/orders";
+  }
+
+
+  @GetMapping("/delete/{id}")
+  public String delete(@PathVariable Long id) {
+    orderService.delete(id);
+    return "redirect:/orders";
+  }
+
+  @GetMapping("/edit/{id}")
+  public String edit(@PathVariable Long id, Model model) {
+    Order order = orderService.findById(id);
+    if (order == null) {
+      return "redirect:/orders";
+    }
+    model.addAttribute("order", order);
+    model.addAttribute("users", userService.findAll());
+    model.addAttribute("products", productService.findAll());
+    return "orders/form";
+  }
+
+}
+  </pre>
+</body>
+</html>

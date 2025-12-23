@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Сервисы</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+    nav a { margin-right: 15px; text-decoration: none; color: blue; }
+    h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
+    pre { background: #f4f4f4; padding: 10px; overflow-x: auto; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+<h1>Сервисы проекта</h1>
+<nav>
+  <a href="index.html">Главная</a>
+  <a href="controllers.html">Контроллеры</a>
+  <a href="models.html">Модели</a>
+  <a href="repositories.html">Репозитории</a>
+  <a href="dataloader.html">DataLoader</a>
+  <a href="pages.html">Шаблоны Thymeleaf</a>
+</nav>
+
+<h2>UserService</h2>
+<p>Реализует бизнес-логику работы с пользователями:</p>
+<ul>
+  <li>findAll() — получить список всех пользователей</li>
+  <li>findById(Long id) — найти пользователя по ID</li>
+  <li>save(User user) — создать или обновить пользователя</li>
+  <li>delete(Long id) — удалить пользователя по ID</li>
+</ul>
+<pre>
+@Service
+public class UserService {
+
+  private final UserRepository repository;
+
+  public UserService(UserRepository repository) {
+    this.repository = repository;
+  }
+
+  public List[User] findAll() {
+    return repository.findAll();
+  }
+
+  public User findById(Long id) {
+    return repository.findById(id).orElse(null);
+  }
+
+  public void save(User user) {
+    repository.save(user);
+  }
+
+  public void delete(Long id) {
+    repository.deleteById(id);
+  }
+}
+</pre>
+
+<h2>ProductService</h2>
+<p>Работа с продуктами:</p>
+<ul>
+  <li>findAll() — получить все продукты</li>
+  <li>findById(Long id) — найти продукт по ID</li>
+  <li>save(Product product) — сохранить продукт</li>
+  <li>delete(Long id) — удалить продукт</li>
+</ul>
+<pre>
+@Service
+public class ProductService {
+
+  private final ProductRepository repository;
+
+  public ProductService(ProductRepository repository) {
+    this.repository = repository;
+  }
+
+  public List[Product] findAll() {
+    return repository.findAll();
+  }
+
+  public Product findById(Long id) {
+    return repository.findById(id).orElse(null);
+  }
+
+  public void save(Product product) {
+    repository.save(product);
+  }
+
+  public void delete(Long id) {
+    repository.deleteById(id);
+  }
+}
+</pre>
+
+<h2>OrderService</h2>
+<p>Работа с заказами:</p>
+<ul>
+  <li>findAll() — список всех заказов</li>
+  <li>findById(Long id) — найти заказ по ID</li>
+  <li>save(Order order) — сохранить заказ</li>
+  <li>delete(Long id) — удалить заказ</li>
+</ul>
+<pre>
+@Service
+public class OrderService {
+
+  private final OrderRepository repository;
+
+  public OrderService(OrderRepository repository) {
+    this.repository = repository;
+  }
+
+  public List[Order] findAll() {
+    return repository.findAll();
+  }
+
+  public Order findById(Long id) {
+    return repository.findById(id).orElse(null);
+  }
+
+  public void save(Order order) {
+    repository.save(order);
+  }
+
+  public void delete(Long id) {
+    repository.deleteById(id);
+  }
+}
+</pre>
+
+<h2>OrderItemService</h2>
+<p>Работа с позициями заказа:</p>
+<ul>
+  <li>findAll() — получить все позиции заказов</li>
+  <li>save(OrderItem item) — сохранить позицию заказа</li>
+  <li>delete(Long id) — удалить позицию заказа</li>
+</ul>
+<pre>
+@Service
+public class OrderItemService {
+
+  private final OrderItemRepository repository;
+
+  public OrderItemService(OrderItemRepository repository) {
+    this.repository = repository;
+  }
+
+  public List[OrderItem] findAll() {
+    return repository.findAll();
+  }
+
+  public void save(OrderItem item) {
+    repository.save(item);
+  }
+
+  public void delete(Long id) {
+    repository.deleteById(id);
+  }
+}</pre>
+
+</body>
+</html>

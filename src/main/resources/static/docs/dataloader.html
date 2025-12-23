@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>DataLoader</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+    nav a { margin-right: 15px; text-decoration: none; color: blue; }
+    pre { background: #f4f4f4; padding: 10px; overflow-x: auto; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+<h1>DataLoader</h1>
+<nav>
+  <a href="index.html">Главная</a>
+  <a href="controllers.html">Контроллеры</a>
+  <a href="services.html">Сервисы</a>
+  <a href="models.html">Модели</a>
+  <a href="repositories.html">Репозитории</a>
+  <a href="pages.html">Шаблоны Thymeleaf</a>
+</nav>
+
+<p>Компонент CommandLineRunner, который загружает данные при старте приложения:</p>
+<ul>
+  <li>Создает 10 пользователей</li>
+  <li>Создает 10 продуктов</li>
+  <li>Создает множество заказов с позициями</li>
+</ul>
+
+<pre>
+@Component
+public class DataLoader implements CommandLineRunner {
+
+  private final UserService userService;
+  private final ProductService productService;
+  private final OrderService orderService;
+
+  public DataLoader(UserService userService,
+      ProductService productService,
+      OrderService orderService) {
+    this.userService = userService;
+    this.productService = productService;
+    this.orderService = orderService;
+  }
+
+  @Override
+  public void run(String... args) {
+    // USERS
+    Map<Integer, User> users = new HashMap<>();
+    users.put(1, createUser("Анна", "Сергеевна", "Иванова", "анна.иванов@mail.ru"));
+    ...
+
+    // PRODUCTS
+    Map<Integer, Product> products = new HashMap<>();
+    products.put(1, createProduct("Футболка белая", 1299));
+    ...
+
+    // ORDERS
+    createOrder(users.get(1), LocalDate.of(2025, 8, 24), new int[][]{{1, 2}, {7, 3}});
+    ...
+
+    System.out.println("DataLoader: Все данные загружены");
+  }
+
+  private User createUser(String firstName, String middleName, String lastName, String email) {
+    User user = new User();
+    user.setFirstName(firstName);
+    user.setMiddleName(middleName);
+    user.setLastName(lastName);
+    user.setEmail(email);
+    userService.save(user);
+    return user;
+  }
+
+  private Product createProduct(String name, double price) {
+    Product product = new Product();
+    product.setName(name);
+    product.setPrice(price);
+    productService.save(product);
+    return product;
+  }
+
+  private void createOrder(User user, LocalDate orderDate, int[][] productsWithQuantity) {
+    Order order = new Order();
+    order.setUser(user);
+    order.setOrderDate(orderDate);
+
+    for (int[] pq : productsWithQuantity) {
+      int productId = pq[0];
+      int quantity = pq[1];
+
+      if (quantity <= 0) continue;
+      Product product = productService.findById((long) productId);
+      if (product != null) {
+        OrderItem item = new OrderItem();
+        item.setProduct(product);
+        item.setQuantity(quantity);
+        item.setPrice(product.getPrice() * quantity);
+        order.addItem(item);
+      }
+    }
+
+    orderService.save(order);
+  }
+}
+</pre>
+
+<p>Все данные автоматически сохраняются через соответствующие сервисы: userService, productService, orderService.</p>
+
+</body>
+</html>

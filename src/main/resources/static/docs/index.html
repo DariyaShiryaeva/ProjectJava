@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Документация проекта Java Spring Boot</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+    nav a { margin-right: 15px; text-decoration: none; color: blue; }
+    h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
+    p { max-width: 900px; }
+  </style>
+</head>
+<body>
+<h1>Документация проекта Java Spring Boot</h1>
+
+<nav>
+  <a href="controllers.html">Контроллеры</a>
+  <a href="services.html">Сервисы</a>
+  <a href="models.html">Модели</a>
+  <a href="repositories.html">Репозитории</a>
+  <a href="dataloader.html">DataLoader</a>
+  <a href="pages.html">Шаблоны Thymeleaf</a>
+</nav>
+
+<h2>Общее описание проекта</h2>
+<p>
+  Это учебный проект на Spring Boot с использованием Spring Data JPA и Thymeleaf.
+  Проект реализует простую систему управления заказами: пользователи могут создавать заказы, выбирать продукты и их количество.
+  В базе данных хранятся пользователи (User), продукты (Product), заказы (Order) и позиции заказов (OrderItem).
+  DataLoader загружает пример данных при старте приложения.
+</p>
+
+<h2>Структура проекта</h2>
+<ul>
+  <li><b>controller</b> — контроллеры для обработки HTTP-запросов (UserController, ProductController, OrderController)</li>
+  <li><b>service</b> — бизнес-логика приложения (CRUD для пользователей, продуктов, заказов)</li>
+  <li><b>model</b> — сущности JPA (User, Product, Order, OrderItem)</li>
+  <li><b>repository</b> — интерфейсы Spring Data JPA для работы с базой</li>
+  <li><b>templates</b> — Thymeleaf-шаблоны для отображения страниц</li>
+  <li><b>DataLoader</b> — компонент для начальной загрузки данных</li>
+</ul>
+
+<p>Используя навигацию выше, вы можете перейти к подробному описанию каждого компонента проекта.</p>
+</body>
+</html>
