@@ -1,6 +1,5 @@
 package ru.shiryaeva.projectjava.controller;
 
-
 import ru.shiryaeva.projectjava.model.User;
 import ru.shiryaeva.projectjava.model.OrderItem;
 import ru.shiryaeva.projectjava.model.Order;
@@ -13,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Iterator;
 
 @Controller
 @RequestMapping("/orders")
@@ -36,20 +36,14 @@ public class OrderController {
     return "orders/list";
   }
 
-  @GetMapping("/new")
-  public String create(Model model) {
-    Order order = new Order();
-    order.setOrderDate(LocalDate.now());
-
-    model.addAttribute("order", order);
-    model.addAttribute("users", userService.findAll());
-    model.addAttribute("products", productService.findAll());
-
-    return "orders/form";
-  }
-
   @PostMapping
   public String save(@ModelAttribute Order order) {
+    order.getItems().removeIf(item -> item.getProduct() == null || item.getQuantity() <= 0);
+
+    if (order.getItems().isEmpty()) {
+      return "redirect:/orders/new";
+    }
+
     User user = userService.findById(order.getUser().getId());
     order.setUser(user);
 
@@ -62,14 +56,20 @@ public class OrderController {
 
     order.recalculateTotalAmount();
     orderService.save(order);
+
     return "redirect:/orders";
   }
 
+  @GetMapping("/new")
+  public String create(Model model) {
+    Order order = new Order();
+    order.setOrderDate(LocalDate.now());
+    order.ensureItems(); // хотя бы один элемент для формы
 
-  @GetMapping("/delete/{id}")
-  public String delete(@PathVariable Long id) {
-    orderService.delete(id);
-    return "redirect:/orders";
+    model.addAttribute("order", order);
+    model.addAttribute("users", userService.findAll());
+    model.addAttribute("products", productService.findAll());
+    return "orders/form";
   }
 
   @GetMapping("/edit/{id}")
@@ -78,10 +78,17 @@ public class OrderController {
     if (order == null) {
       return "redirect:/orders";
     }
+    order.ensureItems(); // гарантируем хотя бы один элемент
     model.addAttribute("order", order);
     model.addAttribute("users", userService.findAll());
     model.addAttribute("products", productService.findAll());
     return "orders/form";
   }
 
+
+  @GetMapping("/delete/{id}")
+  public String delete(@PathVariable Long id) {
+    orderService.delete(id);
+    return "redirect:/orders";
+  }
 }

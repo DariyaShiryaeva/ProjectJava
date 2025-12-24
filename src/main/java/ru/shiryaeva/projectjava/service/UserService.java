@@ -3,6 +3,8 @@ package ru.shiryaeva.projectjava.service;
 import org.springframework.stereotype.Service;
 import ru.shiryaeva.projectjava.model.User;
 import ru.shiryaeva.projectjava.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 
@@ -27,7 +29,12 @@ public class UserService {
     repository.save(user);
   }
 
+  @Transactional
   public void delete(Long id) {
-    repository.deleteById(id);
+    User user = repository.findById(id).orElse(null);
+    if (user != null) {
+      repository.delete(user);
+    }
   }
+
 }

@@ -3,6 +3,9 @@ package ru.shiryaeva.projectjava.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "products")
@@ -24,6 +27,14 @@ public class Product {
 
   private int stockQuantity;
   private double rating;
+
+  @OneToMany(
+      mappedBy = "product",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true
+  )
+  private List<OrderItem> orderItems = new ArrayList<>();
+
 
   public Long getId() { return id; }
   public void setId(Long id) { this.id = id; }
@@ -48,4 +59,8 @@ public class Product {
 
   public double getRating() { return rating; }
   public void setRating(double rating) { this.rating = rating; }
+
+  public List<OrderItem> getOrderItems() {
+    return orderItems;
+  }
 }

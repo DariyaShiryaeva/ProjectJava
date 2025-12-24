@@ -8,6 +8,7 @@
 <h2 th:text="${order.id} != null ? 'Редактировать заказ' : 'Добавить заказ'"></h2>
 
 <form th:action="@{/orders}" th:object="${order}" method="post">
+
   <input type="hidden" th:field="*{id}" />
 
   <label>Пользователь:</label>
@@ -17,27 +18,49 @@
             th:selected="${order.user != null} ? ${u.id} == ${order.user.id} : false">
     </option>
   </select>
-  <div th:if="${#fields.hasErrors('user')}" th:errors="*{user}"></div>
 
-  <label>Продукт:</label>
-  <select th:field="*{items[0].product.id}" required>
-    <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.name}"
-            th:selected="${order.items.size() > 0} ? ${p.id} == ${order.items[0].product.id} : false">
-    </option>
-  </select>
-  <div th:if="${#fields.hasErrors('items[0].product')}" th:errors="*{items[0].product}"></div>
+  <h3>Продукты</h3>
+  <div id="items-container">
+    <div th:each="item, iterStat : *{items}" class="item-row">
+      <select th:field="*{items[__${iterStat.index}__].product.id}" required>
+        <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.name}"></option>
+      </select>
+      <input type="number" th:field="*{items[__${iterStat.index}__].quantity}" min="1" required />
+      <button type="button" onclick="removeItem(this)">Удалить</button>
+    </div>
+  </div>
 
-  <label>Количество:</label>
-  <input type="number" th:field="*{items[0].quantity}" min="1" required />
-  <div th:if="${#fields.hasErrors('items[0].quantity')}" th:errors="*{items[0].quantity}"></div>
-
-  <label>Дата заказа:</label>
-  <input type="date" th:field="*{orderDate}" required />
-
+  <button type="button" onclick="addItem()">Добавить продукт</button>
+  <br><br>
   <button type="submit">Сохранить</button>
 </form>
 
 <br>
 <a th:href="@{/orders}">Назад к списку заказов</a>
+
+<script>
+  let index = /*[[${order.items.size()}]]*/ 0;
+
+  function addItem() {
+    const container = document.getElementById('items-container');
+    const div = document.createElement('div');
+    div.className = 'item-row';
+
+    div.innerHTML = `
+            <select name="items[\${index}].product.id" required>
+                <option th:each="p : ${products}" th:value="\${p.id}" th:text="\${p.name}">Продукт</option>
+            </select>
+            <input type="number" name="items[\${index}].quantity" min="1" required />
+            <button type="button" onclick="removeItem(this)">Удалить</button>
+        `;
+    container.appendChild(div);
+    index++;
+  }
+
+  function removeItem(button) {
+    button.parentElement.remove();
+  }
+</script>
+
 </body>
 </html>

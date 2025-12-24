@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -30,6 +32,13 @@ public class User {
   @NotBlank
   @Column(name = "name", nullable = false)
   private String name; // новое поле для полного имени
+
+  @OneToMany(
+      mappedBy = "user",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true
+  )
+  private List<Order> orders = new ArrayList<>();
 
   public Long getId() {
     return id;
@@ -114,4 +123,9 @@ public class User {
   private void updateName() {
     this.name = getFullName();
   }
+
+  public List<Order> getOrders() {
+    return orders;
+  }
+
 }

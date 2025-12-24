@@ -55,6 +55,13 @@ public class User {
   @Column(name = "name", nullable = false)
   private String name; // новое поле для полного имени
 
+  @OneToMany(
+      mappedBy = "user",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true
+  )
+  private List[Order] orders = new ArrayList<>();
+
   public Long getId() {
     return id;
   }
@@ -138,7 +145,13 @@ public class User {
   private void updateName() {
     this.name = getFullName();
   }
+
+  public List[Order] getOrders() {
+    return orders;
+  }
+
 }
+
 </pre>
 
 <h2>Product</h2>
@@ -169,6 +182,14 @@ public class Product {
   private int stockQuantity;
   private double rating;
 
+  @OneToMany(
+      mappedBy = "product",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true
+  )
+  private List[OrderItem] orderItems = new ArrayList<>();
+
+
   public Long getId() { return id; }
   public void setId(Long id) { this.id = id; }
 
@@ -192,6 +213,10 @@ public class Product {
 
   public double getRating() { return rating; }
   public void setRating(double rating) { this.rating = rating; }
+
+  public List[OrderItem] getOrderItems() {
+    return orderItems;
+  }
 }
 </pre>
 
@@ -216,8 +241,10 @@ public class Order {
 
   private double totalAmount;
 
-  @ManyToOne
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "user_id")
   private User user;
+
 
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
   private List[OrderItem] items = new ArrayList<>();
